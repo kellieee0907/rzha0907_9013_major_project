@@ -1,4 +1,3 @@
-// Define a class named BigRectangle for creating and displaying large rectangles
 class BigRectangle {
   constructor(x, y, width, height, color) {
     this.x = x;      // The x-coordinate of the rectangle
@@ -10,6 +9,8 @@ class BigRectangle {
     this.baseY = y;     // Base y-coordinate for resizing
     this.baseWidth = width; // Base width for resizing
     this.baseHeight = height; // Base height for resizing
+    this.pulseSpeed = random(0.01, 0.05); // Random pulse speed
+    this.pulseOffset = random(TWO_PI); // Random pulse offset
   }
 
   // Method to resize the rectangle based on the new canvas size
@@ -20,13 +21,20 @@ class BigRectangle {
     this.height = this.baseHeight * canvasSize;
   }
 
-  // Method to display the rectangle
+  // Method to display the rectangle with a pulsating effect
   display() {
     fill(this.color);  // Set the fill color for the rectangle
     noStroke();        // Remove the stroke (outline) of the shape
-    rect(this.x, this.y, this.width, this.height);  // Draw the rectangle
+
+    // Calculate pulsation effect
+    let pulse = sin(millis() * this.pulseSpeed + this.pulseOffset) * 0.05 + 1;
+    let pulsingWidth = this.width * pulse;
+    let pulsingHeight = this.height * pulse;
+
+    rect(this.x + (this.width - pulsingWidth) / 2, this.y + (this.height - pulsingHeight) / 2, pulsingWidth, pulsingHeight);  // Draw the rectangle
   }
 }
+
 
 let bigRectangles = [];  // Initialize an empty array to store big rectangle objects
 
