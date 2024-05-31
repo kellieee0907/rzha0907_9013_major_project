@@ -1,3 +1,5 @@
+let animationEndTime; // Time when the animation ends
+
 class BigRectangle {
   constructor(x, y, width, height, color) {
     this.x = x;      // The x-coordinate of the rectangle
@@ -22,19 +24,26 @@ class BigRectangle {
   }
 
   // Method to display the rectangle with a pulsating effect
-  display() {
+  display(animationEndTime) {
     fill(this.color);  // Set the fill color for the rectangle
     noStroke();        // Remove the stroke (outline) of the shape
 
-    // Calculate pulsation effect
-    let pulse = sin(millis() * this.pulseSpeed + this.pulseOffset) * 0.05 + 1;
-    let pulsingWidth = this.width * pulse;
-    let pulsingHeight = this.height * pulse;
+    let elapsedTime = millis();
 
-    rect(this.x + (this.width - pulsingWidth) / 2, this.y + (this.height - pulsingHeight) / 2, pulsingWidth, pulsingHeight);  // Draw the rectangle
+    if (elapsedTime > animationEndTime) {
+      // Calculate pulsation effect
+      // this sin(...) function this from CHATGPT and it creates a smooth value between -1 and 1.
+      let pulse = sin((elapsedTime - animationEndTime) * this.pulseSpeed + this.pulseOffset) * 0.05 + 1;
+
+      //slight varying dimensions (larger and smaller) based on the pulse value
+      let pulsingWidth = this.width * pulse;
+      let pulsingHeight = this.height * pulse;
+
+      // Draw the rectangle with pulsating effect
+      rect(this.x + (this.width - pulsingWidth) / 2, this.y + (this.height - pulsingHeight) / 2, pulsingWidth, pulsingHeight);  // Draw the rectangle
+    }
   }
 }
-
 
 let bigRectangles = [];  // Initialize an empty array to store big rectangle objects
 
@@ -53,6 +62,10 @@ function setup() {
 
   rowStartTime = millis(); // Initialize row animation start time
   colStartTime = millis(); // Initialize column animation start time
+
+  //Calculate the end time of the animation.
+  //After all the drawRow and drawColumn animations have finished, the BigRectangle class will start pulsing.
+  animationEndTime = rowStartTime + 6500 + 100 * 49;
 
   // Set big rectangle, Layer them on the canvas from largest to smallest.
   bigRectangles.push(new BigRectangle(0.868, 0.22, 0.066, 0.066, red));
@@ -92,7 +105,6 @@ function setup() {
   bigRectangles.push(new BigRectangle(0.181, 0.287, 0.035, 0.035, grey));
   bigRectangles.push(new BigRectangle(0.381, 0.946, 0.066, 0.044, red));
 
-
   // Resize all big rectangles to fit the current canvas size
   bigRectangles.forEach(rectangle => rectangle.resize(canvasSize));
 
@@ -109,8 +121,7 @@ function draw() {
   let rectWidth = canvasSize * 0.022;
   let rectHeight = canvasSize * 0.02;
 
-
-//Draw rows and columns
+  //Draw rows and columns
   translate(0, canvasSize * 0.56);
   noStroke();
   drawRow(0, 0, rectWidth, rectHeight,
@@ -167,7 +178,6 @@ function draw() {
       grey, grey, grey, grey, blue, yellow, yellow, grey, yellow, grey, yellow, yellow, red, grey, yellow, grey, yellow, yellow, blue, yellow,
       yellow, yellow, red, yellow, yellow, grey, red, yellow, red, grey], rowStartTime + 6000);
 
-
   //column
   translate(0, (-canvasSize * 0.56));
 
@@ -221,9 +231,8 @@ function draw() {
   // Display all the big rectangles by iterating over the array and resizing them
   bigRectangles.forEach(rectangle => {
     rectangle.resize(canvasSize);
-    rectangle.display();
+    rectangle.display(animationEndTime);
   });
-
 }
 
 // Function to draw a row of colored squares with time-based animation
@@ -238,7 +247,6 @@ function drawRow(x, y, w, h, colors, startTime) {
   }
 }
 
-
 // Function to draw a column of colored squares with time-based animation
 function drawColumn(x, y, w, h, colors, startTime) {
   let elapsedTime = millis() - startTime;
@@ -250,7 +258,6 @@ function drawColumn(x, y, w, h, colors, startTime) {
     }
   }
 }
-
 
 // Adjust canvas size when window is resized
 function windowResized() {
