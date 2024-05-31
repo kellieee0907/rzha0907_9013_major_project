@@ -1,4 +1,5 @@
 let animationEndTime; // Time when the animation ends
+let bigRectangleStartTime; // Time when the BigRectangle animation starts
 
 class BigRectangle {
   constructor(x, y, width, height, color) {
@@ -25,12 +26,15 @@ class BigRectangle {
 
   // Method to display the rectangle with a pulsating effect
   display(animationEndTime) {
-    fill(this.color);  // Set the fill color for the rectangle
-    noStroke();        // Remove the stroke (outline) of the shape
-
     let elapsedTime = millis();
 
-    if (elapsedTime > animationEndTime) {
+    // 500ms delay between each rectangle appearance
+    let delay = (bigRectangles.indexOf(this) + 1) * 500;
+
+    if (elapsedTime > animationEndTime + delay) {
+      fill(this.color);  // Set the fill color for the rectangle
+      noStroke();        // Remove the stroke (outline) of the shape
+
       // Calculate pulsation effect
       // this sin(...) function this from CHATGPT and it creates a smooth value between -1 and 1.
       let pulse = sin((elapsedTime - animationEndTime) * this.pulseSpeed + this.pulseOffset) * 0.05 + 1;
@@ -66,6 +70,9 @@ function setup() {
   //Calculate the end time of the animation.
   //After all the drawRow and drawColumn animations have finished, the BigRectangle class will start pulsing.
   animationEndTime = rowStartTime + 6500 + 100 * 49;
+
+  bigRectangleStartTime = animationEndTime + 200; // Start BigRectangle animation 200ms after the end of row/column animations
+
 
   // Set big rectangle, Layer them on the canvas from largest to smallest.
   bigRectangles.push(new BigRectangle(0.868, 0.22, 0.066, 0.066, red));
@@ -107,7 +114,6 @@ function setup() {
 
   // Resize all big rectangles to fit the current canvas size
   bigRectangles.forEach(rectangle => rectangle.resize(canvasSize));
-
 }
 
 // The draw function that gets called repeatedly to draw the content on the canvas
@@ -231,7 +237,7 @@ function draw() {
   // Display all the big rectangles by iterating over the array and resizing them
   bigRectangles.forEach(rectangle => {
     rectangle.resize(canvasSize);
-    rectangle.display(animationEndTime);
+    rectangle.display(bigRectangleStartTime);
   });
 }
 
