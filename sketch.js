@@ -51,12 +51,15 @@ class BigRectangle {
 
 // A class of random rectangles intended to produce some sporadic effects to embellish.
 class RandomRectangle {
-  constructor(x, y, size, color, startAfter){
+  constructor(x, y, size, color, startAfter) {
     this.x = x;
     this.y = y;
     this.size = size;
     this.color = color;
     this.startAfter = startAfter;
+    this.baseX = x / width;     // Store base coordinates as a fraction of the canvas size
+    this.baseY = y / height;    // Store base coordinates as a fraction of the canvas size
+    this.baseSize = size / min(windowWidth, windowHeight); // Store base size as a fraction of the canvas size
     this.resetAppearance();
   }
 
@@ -66,7 +69,13 @@ class RandomRectangle {
     this.appearTime = this.startAfter + random(0, 1000);
     // Random disappearance time after appearance
     this.disappearTime = this.appearTime + random(500, 1500);
-    console.log(`Rectangle at (${this.x}, ${this.y}) will appear at ${this.appearTime} and disappear at ${this.disappearTime}`);
+  }
+
+  // Method to resize the rectangle based on the new canvas size
+  resize(canvasSize) {
+    this.x = this.baseX * canvasSize;
+    this.y = this.baseY * canvasSize;
+    this.size = this.baseSize * canvasSize;
   }
 
   display(){
@@ -165,6 +174,8 @@ function setup() {
 
   // Resize all big rectangles to fit the current canvas size
   bigRectangles.forEach(rectangle => rectangle.resize(canvasSize));
+  // Resize all random rectangles to fit the current canvas size
+  randomRectangles.forEach(rectangle => rectangle.resize(canvasSize));
 }
 
 // The draw function that gets called repeatedly to draw the content on the canvas
@@ -324,5 +335,10 @@ function drawColumn(x, y, w, h, colors, startTime) {
 function windowResized() {
   let canvasSize = min(windowWidth, windowHeight);
   resizeCanvas(canvasSize, canvasSize);
+
+  // Resize all big rectangles to fit the current canvas size
+  bigRectangles.forEach(rectangle => rectangle.resize(canvasSize));
+  // Resize all random rectangles to fit the current canvas size
+  randomRectangles.forEach(rectangle => rectangle.resize(canvasSize));
   draw(); // redraw the canvas after resizing
 }
