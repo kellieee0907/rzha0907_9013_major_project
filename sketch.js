@@ -49,7 +49,45 @@ class BigRectangle {
   }
 }
 
-let bigRectangles = [];  // Initialize an empty array to store big rectangle objects
+// A class of random rectangles intended to produce some sporadic effects to embellish.
+class RandomRectangle {
+  constructor(x, y, size, color, startAfter){
+    this.x = x;
+    this.y = y;
+    this.size = size;
+    this.color = color;
+    this.startAfter = startAfter;
+    this.resetAppearance();
+  }
+
+  resetAppearance(){
+    let currentTime = millis();
+    // Random appearance time within 1 second after big rectangles
+    this.appearTime = this.startAfter + random(0, 1000);
+    // Random disappearance time after appearance
+    this.disappearTime = this.appearTime + random(500, 1500);
+    console.log(`Rectangle at (${this.x}, ${this.y}) will appear at ${this.appearTime} and disappear at ${this.disappearTime}`);
+  }
+
+  display(){
+    let elapsedTime = millis();
+    if (elapsedTime > this.appearTime && elapsedTime < this.disappearTime) {
+      fill(this.color);  // Set the fill color for the rectangle
+      noStroke();        // Remove the stroke (outline) of the shape
+      rect(this.x, this.y, this.size, this.size);  // Draw the rectangle
+    } else if (elapsedTime > this.disappearTime) {
+      // Reset appearance times to create continuous appearance and disappearance.
+      this.resetAppearance();
+    }
+  }
+}
+
+
+// Initialize an empty array to store big rectangle
+let bigRectangles = [];
+
+// Initialize an empty array to store random rectangle
+let randomRectangles = [];
 
 // Define color variables in hexadecimal format
 let yellow = '#EBCF14';
@@ -73,6 +111,19 @@ function setup() {
 
   bigRectangleStartTime = animationEndTime + 200; // Start BigRectangle animation 200ms after the end of row/column animations
 
+  // Start RandomRectangle animation after all BigRectangles have appeared
+  let randomRectangleStartTime = bigRectangleStartTime + 500 * 36;
+
+  // Create random rectangles
+  for (let i = 0; i < 50; i++) {
+    let x = random(width);
+    let y = random(height);
+    let size = random(10, 20);
+    let color = random([yellow, red, blue, grey]);
+
+    //Set random rectangles
+    randomRectangles.push(new RandomRectangle(x, y, size, color, randomRectangleStartTime));
+  }
 
   // Set big rectangle, Layer them on the canvas from largest to smallest.
   bigRectangles.push(new BigRectangle(0.868, 0.22, 0.066, 0.066, red));
@@ -159,7 +210,6 @@ function draw() {
     [blue, yellow, yellow, grey, yellow, red], rowStartTime + 4000);
 
 
-
   // the first row
   drawRow(0, canvasSize * -0.51, rectWidth, rectHeight * 1.02,
     [yellow, blue, yellow, yellow, yellow, yellow, yellow, blue, yellow, grey, yellow, yellow, yellow, yellow, yellow, grey, yellow,
@@ -239,6 +289,11 @@ function draw() {
     rectangle.resize(canvasSize);
     rectangle.display(bigRectangleStartTime);
   });
+
+  // Display random rectangles only after big rectangles have appeared
+  if (millis() > bigRectangleStartTime + 500 * bigRectangles.length) {
+    randomRectangles.forEach(rectangle => rectangle.display());
+  }
 }
 
 // Function to draw a row of colored squares with time-based animation
